@@ -1,12 +1,12 @@
 from flask import request
 from flask_restful import Resource
-import requests
+from aylienapiclient import textapi
 
+from secrets_apis import AYLIEN_APP_ID, AYLIEN_API_KEY
 from controllers.jwt_validator import validate_jwt
-from secrets_apis import YANDEX_TRANSLATE_API_KEY
 
 
-class Translate(Resource):
+class Summarizer(Resource):
     def post(self):
         data = request.get_json()
         is_valid = None
@@ -18,13 +18,8 @@ class Translate(Resource):
         if not is_valid:
             return {'error': True, 'errorMessage': 'Invalid access_token'}, 400
 
-        lang = data['lang']
-        text = data['text']
+        client = textapi.Client(AYLIEN_APP_ID, AYLIEN_API_KEY)
+        summary = client.Summarize(
+            {'text': data['text'], 'title': data['title'], 'sentences_number': 3})
 
-        r = requests.get(
-            f'https://translate.yandex.net/api/v1.5/tr.json/translate?key={YANDEX_TRANSLATE_API_KEY}&text={text}&lang={lang}&options=1')
-
-        r_data = r.json()
-        del r_data['code']
-
-        return {'error': False, 'results': r_data}
+        return {'error': False, 'results': summary}

@@ -9,12 +9,11 @@ from validators.signup import signup_validator
 class SignUp(Resource):
     def post(self):
         data = request.get_json()
-        if not signup_validator.validate(data):
-            print(signup_validator.errors)
-            return {'error': True, 'errorMesssage': signup_validator.errors}, 400
-
-        if data['password'] != data['cpassword']:
-            return {'error': True, 'errorMessage': {'cpassword': ['Both passwords should match']}}, 400
+        if not signup_validator.validate(data) or data['password'] != data['cpassword']:
+            errors = signup_validator.errors
+            if data['password'] != data['cpassword']:
+                errors['cpassword'] = ['Both passwords should match.']
+            return {'error': True, 'errorMesssage': errors}, 400
 
         del data['cpassword']
 

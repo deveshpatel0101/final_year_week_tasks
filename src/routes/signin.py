@@ -7,7 +7,7 @@ import uuid
 from db.user import users
 from validators.signin import signin_validator
 from controllers.time import current_sec_time
-
+from secrets_apis import JWT_SECRET
 
 class SignIn(Resource):
     def post(self):
@@ -34,5 +34,5 @@ class SignIn(Resource):
              'iat': curr_time,
              'exp': curr_time + 86400
              },
-            'some long secret', algorithm='HS256')
+            JWT_SECRET, algorithm='HS256')
         return {'error': False, 'access_token': encoded_jwt.decode()}

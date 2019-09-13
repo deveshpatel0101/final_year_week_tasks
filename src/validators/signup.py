@@ -20,6 +20,14 @@ signup_schema = {
     'cpassword': {
         'type': 'string',
         'regex': '^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?!.*\s).{4,}$'
+    },
+    'account_type': {
+        'type': 'string',
+        'regex': '^(free)$'
+    },
+    'applications': {
+        'type': 'list',
+        'maxlength': 0
     }
 }
 

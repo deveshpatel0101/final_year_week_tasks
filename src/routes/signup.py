@@ -9,6 +9,9 @@ from validators.signup import signup_validator
 class SignUp(Resource):
     def post(self):
         data = request.get_json()
+        data['account_type'] = 'free'
+        data['applications'] = []
+
         if not signup_validator.validate(data) or data['password'] != data['cpassword']:
             errors = signup_validator.errors
             if data['password'] != data['cpassword']:
@@ -28,6 +31,6 @@ class SignUp(Resource):
         result = users.save(data)
 
         if result:
-            return {'error': False, 'errorMessage': 'Signup successful!'}, 200
+            return {'error': False, 'results': 'Signup successful!'}, 200
 
         return {'error': True, 'errorMessage': 'Something went wrong from our side. Sorry for the incovenience.'}, 500

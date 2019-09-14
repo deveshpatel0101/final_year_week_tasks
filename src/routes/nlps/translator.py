@@ -4,6 +4,7 @@ import requests
 
 from controllers.jwt_validator import validate_jwt
 from secrets_apis import YANDEX_TRANSLATE_API_KEY
+from validators.nlps.translator import translator_validator
 from db.user import users
 
 
@@ -20,6 +21,9 @@ class Translate(Resource):
 
         if not decoded:
             return {'error': True, 'errorMessage': 'Invalid access_token'}, 403
+
+        if not translator_validator.validate(data):
+            return {'error': True, 'errorMessage': translator_validator.errors}, 400
 
         db_data = users.find_one({'email': decoded['email']})
 

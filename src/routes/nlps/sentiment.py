@@ -4,6 +4,7 @@ from aylienapiclient import textapi
 
 from secrets_apis import AYLIEN_APP_ID, AYLIEN_API_KEY
 from controllers.jwt_validator import validate_jwt
+from validators.nlps.sentiment import sentiment_validator
 from db.user import users
 
 
@@ -20,6 +21,9 @@ class Sentiment(Resource):
 
         if not decoded:
             return {'error': True, 'errorMessage': 'Invalid access_token'}, 403
+
+        if not sentiment_validator.validate(data):
+            return {'error': True, 'errorMessage': sentiment_validator.errors}, 400
 
         db_data = users.find_one({'email': decoded['email']})
 

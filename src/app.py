@@ -5,9 +5,9 @@ from flask_cors import CORS
 from routes.signup import SignUp
 from routes.signin import SignIn
 from routes.create_app import CreateApp
-from routes.nlps.lang_trans import Translate
+from routes.nlps.translator import Translate
 from routes.nlps.sentiment import Sentiment
-from routes.nlps.entity_extract import EntityExtraction
+from routes.nlps.entities import EntityExtraction
 from routes.nlps.summarization import Summarizer
 
 

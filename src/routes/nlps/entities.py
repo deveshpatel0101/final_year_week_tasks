@@ -4,6 +4,7 @@ from aylienapiclient import textapi
 
 from secrets_apis import AYLIEN_APP_ID, AYLIEN_API_KEY
 from controllers.jwt_validator import validate_jwt
+from validators.nlps.entities import entities_validator
 from db.user import users
 
 
@@ -20,6 +21,9 @@ class EntityExtraction(Resource):
 
         if not decoded:
             return {'error': True, 'errorMessage': 'Invalid secret token'}, 403
+
+        if not entities_validator.validate(data):
+            return {'error': True, 'errorMessage': entities_validator.errors}, 400
 
         db_data = users.find_one({'email': decoded['email']})
 

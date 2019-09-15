@@ -7,3 +7,4 @@ pymongo
 requests
 flask-cors
 aylien-apiclient
+python-dotenv

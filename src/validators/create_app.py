@@ -13,7 +13,8 @@ create_app_schema = {
                 'schema': {
                     'type': 'string',
                     'regex': '^(translator)$|^(entities)|^(sentiment)$|^(summarizer)$'
-                }
+                },
+                'maxlength': 2
             }
         }
     }

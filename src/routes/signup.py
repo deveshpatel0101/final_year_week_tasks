@@ -12,9 +12,10 @@ class SignUp(Resource):
         data['account_type'] = 'free'
         data['applications'] = []
 
-        if not signup_validator.validate(data) or data['password'] != data['cpassword']:
+        print(data, signup_validator.validate(data))
+        if (not signup_validator.validate(data)) or (not 'password' in data) or (not 'cpassword' in data) or (data['password'] != data['cpassword']):
             errors = signup_validator.errors
-            if data['password'] != data['cpassword']:
+            if (('password' in data) and ('cpassword' in data)) and data['password'] != data['cpassword']:
                 errors['cpassword'] = ['Both passwords should match.']
             return {'error': True, 'errorMesssage': errors}, 400
 

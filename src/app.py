@@ -1,6 +1,8 @@
 from flask import Flask, jsonify
 from flask_restful import Api
 from flask_cors import CORS
+from dotenv import load_dotenv
+import os
 
 from routes.signup import SignUp
 from routes.signin import SignIn
@@ -10,10 +12,13 @@ from routes.nlps.sentiment import Sentiment
 from routes.nlps.entities import EntityExtraction
 from routes.nlps.summarization import Summarizer
 
-
 app = Flask(__name__)
 CORS(app)
 api = Api(app)
+
+if not os.getenv('PRODUCTION'):
+    load_dotenv()
+
 
 api.add_resource(SignUp, '/user/signup')
 api.add_resource(SignIn, '/user/signin')

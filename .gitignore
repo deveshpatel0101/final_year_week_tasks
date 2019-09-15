@@ -2,3 +2,4 @@ __pycache__/
 venv/
 secrets_apis.py
 .vscode/
+.env

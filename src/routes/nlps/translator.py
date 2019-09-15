@@ -1,9 +1,9 @@
 from flask import request
 from flask_restful import Resource
 import requests
+import os
 
 from controllers.jwt_validator import validate_jwt
-from secrets_apis import YANDEX_TRANSLATE_API_KEY
 from validators.nlps.translator import translator_validator
 from db.user import users
 
@@ -37,6 +37,8 @@ class Translate(Resource):
 
         lang = data['lang']
         text = data['text']
+
+        YANDEX_TRANSLATE_API_KEY = os.getenv('YANDEX_TRANSLATE_API_KEY')
 
         r = requests.get(
             f'https://translate.yandex.net/api/v1.5/tr.json/translate?key={YANDEX_TRANSLATE_API_KEY}&text={text}&lang={lang}&options=1')

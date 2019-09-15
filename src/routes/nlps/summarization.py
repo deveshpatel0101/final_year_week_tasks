@@ -1,8 +1,8 @@
 from flask import request
 from flask_restful import Resource
 from aylienapiclient import textapi
+import os
 
-from secrets_apis import AYLIEN_APP_ID, AYLIEN_API_KEY
 from controllers.jwt_validator import validate_jwt
 from validators.nlps.summarization import summarizer_validator
 from db.user import users
@@ -35,7 +35,8 @@ class Summarizer(Resource):
         if flag == 0:
             return {'error': True, 'errorMessage': 'Invalid secret token'}, 403
 
-        client = textapi.Client(AYLIEN_APP_ID, AYLIEN_API_KEY)
+        client = textapi.Client(
+            os.getenv('AYLIEN_APP_ID'), os.getenv('AYLIEN_API_KEY'))
         summary = client.Summarize(
             {'text': data['text'], 'title': data['title'], 'sentences_number': 3})
 

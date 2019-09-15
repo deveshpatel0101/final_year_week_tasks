@@ -2,11 +2,11 @@ from flask import request
 from flask_restful import Resource
 from pymongo import ReturnDocument
 import jwt
+import os
 
 from db.user import users
 from controllers.jwt_validator import validate_jwt
 from validators.create_app import create_app_validator
-from secrets_apis import JWT_SECRET
 
 
 class CreateApp(Resource):
@@ -27,6 +27,9 @@ class CreateApp(Resource):
 
         db_data = users.find_one({'email': decoded['email']})
 
+        if db_data['account_type'] == 'free' and len(db_data['applications']) == 3:
+            return {'error': True, 'errorMessage': {'applications': ['You have reached maximum limit of applications you can create. Subscribe to premium and create unlimited applications.']}}
+
         for app in db_data['applications']:
             if app['name'] == data['name']:
                 return {'error': True, 'errorMessage': {'name': ['Application with the similar name already exist.']}}
@@ -36,7 +39,7 @@ class CreateApp(Resource):
              'allowed_apis': data['allowed_apis'],
              'app_name': data['name']
              },
-            JWT_SECRET, algorithm='HS256').decode()
+            os.getenv('JWT_SECRET'), algorithm='HS256').decode()
 
         results = users.find_one_and_update({'email': db_data['email']}, {
             '$push': {'applications': data}}, return_document=ReturnDocument.AFTER)

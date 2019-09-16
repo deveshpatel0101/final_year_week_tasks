@@ -3,9 +3,9 @@ from flask_restful import Resource
 from aylienapiclient import textapi
 import os
 
-from controllers.jwt_validator import validate_jwt
-from validators.nlps.entities import entities_validator
-from db.user import users
+from app.controllers.jwt_validator import validate_jwt
+from app.validators.nlps.entities import entities_validator
+from app.db.user import users
 
 
 class EntityExtraction(Resource):

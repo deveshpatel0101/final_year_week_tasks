@@ -2,8 +2,8 @@ from flask import request
 from flask_restful import Resource
 import bcrypt
 
-from db.user import users
-from validators.signup import signup_validator
+from app.db.user import users
+from app.validators.signup import signup_validator
 
 
 class SignUp(Resource):
@@ -12,7 +12,6 @@ class SignUp(Resource):
         data['account_type'] = 'free'
         data['applications'] = []
 
-        print(data, signup_validator.validate(data))
         if (not signup_validator.validate(data)) or (not 'password' in data) or (not 'cpassword' in data) or (data['password'] != data['cpassword']):
             errors = signup_validator.errors
             if (('password' in data) and ('cpassword' in data)) and data['password'] != data['cpassword']:

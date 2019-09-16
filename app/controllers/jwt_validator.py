@@ -1,6 +1,6 @@
 import jwt
 import os
-from controllers.time import current_sec_time
+from app.controllers.time import current_sec_time
 
 
 def validate_jwt(token):

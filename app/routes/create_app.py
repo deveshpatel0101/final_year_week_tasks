@@ -4,9 +4,9 @@ from pymongo import ReturnDocument
 import jwt
 import os
 
-from db.user import users
-from controllers.jwt_validator import validate_jwt
-from validators.create_app import create_app_validator
+from app.db.user import users
+from app.controllers.jwt_validator import validate_jwt
+from app.validators.create_app import create_app_validator
 
 
 class CreateApp(Resource):

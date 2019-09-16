@@ -5,9 +5,9 @@ import jwt
 import uuid
 import os
 
-from db.user import users
-from validators.signin import signin_validator
-from controllers.time import current_sec_time
+from app.db.user import users
+from app.validators.signin import signin_validator
+from app.controllers.time import current_sec_time
 
 class SignIn(Resource):
     def post(self):

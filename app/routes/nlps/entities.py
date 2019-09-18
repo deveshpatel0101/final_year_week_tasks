@@ -6,6 +6,7 @@ import os
 from app.controllers.jwt_validator import validate_jwt
 from app.validators.nlps.entities import entities_validator
 from app.db.user import users
+from app.controllers.redis_ops import increment, isAllowed, getAll
 
 
 class EntityExtraction(Resource):
@@ -34,6 +35,11 @@ class EntityExtraction(Resource):
 
         if flag == 0:
             return {'error': True, 'errorMessage': 'Invalid secret token'}, 403
+
+        increment(secret_token, 'entities')
+
+        if not isAllowed(secret_token, db_data['account_type']):
+            return {'error': True, 'errorMessage': 'Your per day usage quota has exceeded.'}, 400
 
         client = textapi.Client(
             os.getenv('AYLIEN_APP_ID'), os.getenv('AYLIEN_API_KEY'))

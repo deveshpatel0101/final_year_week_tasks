@@ -7,6 +7,7 @@ import os
 from app.db.user import users
 from app.controllers.jwt_validator import validate_jwt
 from app.validators.create_app import create_app_validator
+from app.controllers.time import current_sec_time
 
 
 class CreateApp(Resource):
@@ -21,6 +22,7 @@ class CreateApp(Resource):
             return {'error': True, 'errorMessage': 'Invalid access_token'}, 400
 
         data = request.get_json()
+        data['requests'] = []
 
         if not create_app_validator.validate({'data': data}):
             return {'error': True, 'errorMessage': create_app_validator.errors['data'][0]}, 400
@@ -41,11 +43,20 @@ class CreateApp(Resource):
              },
             os.getenv('JWT_SECRET'), algorithm='HS256').decode()
 
+        data['created_at'] = current_sec_time()
+
         results = users.find_one_and_update({'email': db_data['email']}, {
             '$push': {'applications': data}}, return_document=ReturnDocument.AFTER)
 
         if not results:
             print(results)
             return {'error': True, 'errorMessage': 'Something went wrong from our side. Sorry for the incovenience.'}, 500
+
+        for app in results['applications']:
+            del app['requests']
+            del app['secret_token']
+
+        del data['secret_token']
+        del data['requests']
 
         return {'error': False, 'results': results['applications'], 'updated': data}, 200

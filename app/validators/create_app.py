@@ -15,6 +15,15 @@ create_app_schema = {
                     'regex': '^(translator)$|^(entities)|^(sentiment)$|^(summarizer)$'
                 },
                 'maxlength': 2
+            },
+            'requests': {
+                'type': 'list',
+                'required': True,
+                'maxlength': 0
+            },
+            'created_at': {
+                'type': 'integer',
+                'required': False
             }
         }
     }

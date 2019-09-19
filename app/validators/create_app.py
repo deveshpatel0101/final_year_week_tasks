@@ -6,7 +6,8 @@ create_app_schema = {
         'schema': {
             'name': {
                 'type': 'string',
-                'minlength': 3
+                'minlength': 3,
+                'required': True
             },
             'allowed_apis': {
                 'type': 'list',
@@ -14,7 +15,8 @@ create_app_schema = {
                     'type': 'string',
                     'regex': '^(translator)$|^(entities)|^(sentiment)$|^(summarizer)$'
                 },
-                'maxlength': 2
+                'maxlength': 2,
+                'required': True
             },
             'requests': {
                 'type': 'list',

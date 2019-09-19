@@ -21,7 +21,7 @@ def increment(key, api_type):
     allowed = f'{key}:allowed'
     main_key = f'{key}:{api_type}'
 
-    if rds.lrange(main_key, 0, -1):
+    if rds.get(count):
         rds.rpush(main_key, current_sec_time())
         rds.incr(count)
 

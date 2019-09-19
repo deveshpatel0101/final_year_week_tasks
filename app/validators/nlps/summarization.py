@@ -2,10 +2,12 @@ from cerberus import Validator
 
 summarizer_schema = {
     'title': {
-        'type': 'string'
+        'type': 'string',
+        'required': True
     },
     'text': {
-        'type': 'string'
+        'type': 'string',
+        'required': True
     },
     'sentences_number': {
         'type': 'string'

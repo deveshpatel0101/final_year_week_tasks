@@ -5,6 +5,7 @@ import os
 
 from app.controllers.jwt_validator import validate_jwt
 from app.validators.nlps.translator import translator_validator
+from app.controllers.redis_ops import increment, isAllowed, getAll
 from app.db.user import users
 
 
@@ -34,6 +35,11 @@ class Translate(Resource):
 
         if flag == 0:
             return {'error': True, 'errorMessage': 'Invalid secret token'}, 403
+
+        increment(secret_token, 'translator')
+
+        if not isAllowed(secret_token, db_data['account_type']):
+            return {'error': True, 'errorMessage': 'Your per day usage quota has exceeded.'}, 400
 
         lang = data['lang']
         text = data['text']

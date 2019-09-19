@@ -2,7 +2,8 @@ from cerberus import Validator
 
 sentiment_schema = {
     'text': {
-        'type': 'string'
+        'type': 'string',
+        'required': True
     }
 }
 

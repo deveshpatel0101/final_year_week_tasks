@@ -2,11 +2,13 @@ from cerberus import Validator
 
 translator_schema = {
     'text': {
-        'type': 'string'
+        'type': 'string',
+        'required': True
     },
     'lang': {
         'type': 'string',
-        'regex': '^([a-z]{2,3})(-)([a-z]{2,3})$'
+        'regex': '^([a-z]{2,3})(-)([a-z]{2,3})$',
+        'required': True
     }
 }
 

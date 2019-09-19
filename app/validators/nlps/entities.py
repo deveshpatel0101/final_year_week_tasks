@@ -2,7 +2,8 @@ from cerberus import Validator
 
 entities_schema = {
     'text': {
-        'type': 'string'
+        'type': 'string',
+        'required': True
     }
 }
 

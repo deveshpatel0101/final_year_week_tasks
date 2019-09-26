@@ -9,6 +9,7 @@ from app.db.user import users
 from app.validators.signin import signin_validator
 from app.controllers.time import current_sec_time
 
+
 class SignIn(Resource):
     def post(self):
         data = request.get_json()
@@ -28,11 +29,15 @@ class SignIn(Resource):
             return {'error': True, 'errorMessage': 'Invalid password'}, 400
 
         curr_time = current_sec_time()
+
+        payload = {'rid': str(result['rid']),
+                   'id': str(uuid.uuid4()),
+                   'iat': curr_time,
+                   'exp': curr_time + 86400
+                   }
+
         encoded_jwt = jwt.encode(
-            {'email': result['email'],
-             'id': str(uuid.uuid4()),
-             'iat': curr_time,
-             'exp': curr_time + 86400
-             },
+            payload,
             os.getenv('JWT_SECRET'), algorithm='HS256')
+
         return {'error': False, 'access_token': encoded_jwt.decode()}

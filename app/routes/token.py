@@ -11,8 +11,6 @@ class Token(Resource):
         access_token = request.headers['Authorization']
         app_name = request.args['name']
 
-        print(app_name)
-
         try:
             decoded = validate_jwt(access_token)
         except:
@@ -24,7 +22,7 @@ class Token(Resource):
         if not app_name:
             return {'error': True, 'errorMessage': {'name': ['Parameter name required.']}}, 400
 
-        db_data = users.find_one({'email': decoded['email']})
+        db_data = users.find_one({'rid': decoded['rid']})
 
         if not db_data:
             return {'error': True, 'errorMessage': 'Something went wrong from our side. Sorry for the incovenience.'}, 500

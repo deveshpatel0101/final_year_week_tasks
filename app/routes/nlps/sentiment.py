@@ -26,19 +26,19 @@ class Sentiment(Resource):
         if not sentiment_validator.validate(data):
             return {'error': True, 'errorMessage': sentiment_validator.errors}, 400
 
-        db_data = users.find_one({'email': decoded['email']})
+        db_data = users.find_one({'rid': decoded['rid']})
 
         flag = 0
         for app in db_data['applications']:
-            if app['name'] == decoded['app_name'] and app['secret_token'] == secret_token and 'sentiment' in app['allowed_apis']:
+            if app['secret_token'] == secret_token and 'sentiment' in app['allowed_apis']:
                 flag = 1
 
         if flag == 0:
             return {'error': True, 'errorMessage': 'Invalid secret token'}, 403
 
-        increment(secret_token, 'sentiment')
+        increment(decoded['rid'], 'sentiment')
 
-        if not isAllowed(secret_token, db_data['account_type']):
+        if not isAllowed(decoded['rid'], db_data['account_type']):
             return {'error': True, 'errorMessage': 'Your per day usage quota has exceeded.'}, 400
 
         client = textapi.Client(

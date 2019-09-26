@@ -2,6 +2,7 @@ from flask import request
 from flask_restful import Resource
 from pymongo import ReturnDocument
 import jwt
+import uuid
 import os
 
 from app.db.user import users
@@ -27,7 +28,7 @@ class CreateApp(Resource):
         if not create_app_validator.validate({'data': data}):
             return {'error': True, 'errorMessage': create_app_validator.errors['data'][0]}, 400
 
-        db_data = users.find_one({'email': decoded['email']})
+        db_data = users.find_one({'rid': decoded['rid']})
 
         if db_data['account_type'] == 'free' and len(db_data['applications']) == 3:
             return {'error': True, 'errorMessage': {'applications': ['You have reached maximum limit of applications you can create. Subscribe to premium and create unlimited applications.']}}
@@ -36,11 +37,10 @@ class CreateApp(Resource):
             if app['name'] == data['name']:
                 return {'error': True, 'errorMessage': {'name': ['Application with the similar name already exist.']}}
 
+        payload = {'rid': db_data['rid'], 'id': str(uuid.uuid4())}
+
         data['secret_token'] = jwt.encode(
-            {'email': db_data['email'],
-             'allowed_apis': data['allowed_apis'],
-             'app_name': data['name']
-             },
+            payload,
             os.getenv('JWT_SECRET'), algorithm='HS256').decode()
 
         data['created_at'] = current_sec_time()
@@ -59,4 +59,4 @@ class CreateApp(Resource):
         del data['secret_token']
         del data['requests']
 
-        return {'error': False, 'results': results['applications'], 'updated': data}, 200
+        return {'error': False, 'results': results['applications'], 'added': data}, 200

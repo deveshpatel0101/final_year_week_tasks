@@ -1,6 +1,7 @@
 from flask import request
 from flask_restful import Resource
 import bcrypt
+import uuid
 
 from app.db.user import users
 from app.validators.signup import signup_validator
@@ -28,9 +29,11 @@ class SignUp(Resource):
         data['password'] = bcrypt.hashpw(
             data['password'].encode(), bcrypt.gensalt()).decode()
 
+        data['rid'] = str(uuid.uuid4())
+
         result = users.save(data)
 
-        if result:
-            return {'error': False, 'results': 'Signup successful!'}, 200
+        if not result:
+            return {'error': True, 'errorMessage': 'Something went wrong from our side. Sorry for the incovenience.'}, 500
 
-        return {'error': True, 'errorMessage': 'Something went wrong from our side. Sorry for the incovenience.'}, 500
+        return {'error': False, 'results': 'Signup successful!'}, 200

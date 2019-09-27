@@ -5,7 +5,7 @@ import os
 
 from app.controllers.jwt_validator import validate_jwt
 from app.validators.nlps.summarization import summarizer_validator
-from app.controllers.redis_ops import increment, isAllowed, getAll
+from app.controllers.redis_ops import increment, isAllowed
 from app.db.user import users
 
 
@@ -38,7 +38,7 @@ class Summarizer(Resource):
 
         increment(decoded['rid'], 'summarizer')
 
-        if not isAllowed(decoded['rid'], db_data['account_type']):
+        if not isAllowed(decoded['rid'], db_data['account_type'], 'summarization'):
             return {'error': True, 'errorMessage': 'Your per day usage quota has exceeded.'}, 400
 
         client = textapi.Client(

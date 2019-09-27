@@ -1,53 +1,86 @@
 from threading import Thread
+import datetime
 
 from app.db.redis import rds
 from app.controllers.time import current_sec_time
 from app.controllers.update_requests import push_requests_to_db
 from app.db.redis import rds_for_db
 
-def isAllowed(key, account_type):
-    allowed = f'{key}:allowed'
-    count = f'{key}:count'
-    if rds.get(allowed) == 'False' or (int(rds.get(count).decode()) > 100 and account_type == 'free'):
-        rds.rpop(key)
-        rds.decr(count)
+
+def isAllowed(key, account_type, api_type):
+    main_key = f'{key}:{api_type}'
+
+    # if premium account allow unlimited calls
+    if account_type == 'premium':
+        start_new_thread(key, api_type)
+        return True
+
+    # get all and decode the dict
+    data = rds.hgetall(key)
+    data = {y.decode('ascii'): data.get(y).decode('ascii')
+            for y in data.keys()}
+
+    # if allowed is false
+    if data['allowed'] == 'False' or int(data['count']) > 100:
+        first_access = datetime.datetime.fromtimestamp(
+            data['first_call']).strftime('%d-%B-%Y')
+        today = (datetime.datetime.now()).strftime('%d-%B-%Y')
+
+        # check if request is on new day
+        if first_access != today:
+            new_data = {'count': 1, 'allowed': 'True',
+                        'first_call': current_sec_time()}
+            rds.hmset(key, new_data)
+            start_new_thread(key, api_type)
+            return True
+
+        # pop one request and increment count by -1
+        rds.rpop(main_key)
+        rds.hincrby(key, 'count', -1)
+        rds.hset(key, 'allowed', 'False')
+        start_new_thread(key, api_type)
+
         return False
+
+    first_access = datetime.datetime.fromtimestamp(
+        data['first_call']).strftime('%d-%B-%Y')
+    today = (datetime.datetime.now()).strftime('%d-%B-%Y')
+
+    # check if request is on new day
+    if first_access != today:
+        new_data = {'count': 1, 'allowed': 'True',
+                    'first_call': current_sec_time()}
+    start_new_thread(key, api_type)
+
     return True
 
 
 def increment(key, api_type):
-    count = f'{key}:count'
-    first_call = f'{key}:first_call'
-    allowed = f'{key}:allowed'
     main_key = f'{key}:{api_type}'
 
-    if rds.get(count):
-        rds.rpush(main_key, current_sec_time())
-        rds.incr(count)
+    data = rds.hgetall(key)
+    data = {y.decode('ascii'): data.get(y).decode('ascii')
+            for y in data.keys()}
 
-        if rds.llen(main_key) > 100 and not rds_for_db.lrange(main_key, 0, -1):
-            rds.move(main_key, 1)
-            rds.set(allowed, 'False')
-            t1 = Thread(target=push_requests_to_db)
-            t1.start()
+    if data:
+        rds.rpush(main_key, current_sec_time())
+        rds.hincrby(key, 'count', 1)
         return True
 
+    new_data = {'count': 1, 'first_call': current_sec_time(),
+                'allowed': 'True'}
     rds.rpush(main_key, current_sec_time())
-    rds.set(count, 1)
-    rds.set(first_call, current_sec_time())
-    rds.set(allowed, 'True')
+    rds.hmset(key, new_data)
     return True
 
 
-def getAll(key, api_type):
-    count = f'{key}:count'
-    first_call = f'{key}:first_call'
+def start_new_thread(key, api_type):
     main_key = f'{key}:{api_type}'
-    data = {}
 
-    data['allowed'] = isAllowed(main_key)
-    data['count'] = rds.get(count)
-    data['calls'] = rds.lrange(main_key, 0, -1)
-    data['first_call'] = rds.get(first_call)
+    if rds.llen(main_key) > 100 and not rds_for_db.lrange(main_key, 0, -1):
+        check = rds.move(main_key, 1)
+        if check:
+            t1 = Thread(target=push_requests_to_db)
+            t1.start()
 
-    return data
+    return

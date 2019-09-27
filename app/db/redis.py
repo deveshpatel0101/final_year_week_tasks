@@ -22,6 +22,6 @@ print('PORT2', port2)
 print('NAME2', db2)
 print('PASSWORD2', password2)
 
-rds = redis.Redis(host=host1, port=port1, db=db1, password=password1)
+rds = redis.Redis(host=host1, port=port1, db=0, password=password1)
 
-rds_for_db = redis.Redis(host=host2, port=port2, db=db2, password=password2)
+rds_for_db = redis.Redis(host=host2, port=port2, db=0, password=password2)

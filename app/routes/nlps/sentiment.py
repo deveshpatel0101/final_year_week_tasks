@@ -6,7 +6,7 @@ import os
 from app.db.user import users
 from app.controllers.jwt_validator import validate_jwt
 from app.validators.nlps.sentiment import sentiment_validator
-from app.controllers.redis_ops import increment, isAllowed, getAll
+from app.controllers.redis_ops import increment, isAllowed
 
 
 class Sentiment(Resource):
@@ -38,7 +38,7 @@ class Sentiment(Resource):
 
         increment(decoded['rid'], 'sentiment')
 
-        if not isAllowed(decoded['rid'], db_data['account_type']):
+        if not isAllowed(decoded['rid'], db_data['account_type'], 'sentiment'):
             return {'error': True, 'errorMessage': 'Your per day usage quota has exceeded.'}, 400
 
         client = textapi.Client(

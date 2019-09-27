@@ -6,7 +6,7 @@ import os
 from app.controllers.jwt_validator import validate_jwt
 from app.validators.nlps.entities import entities_validator
 from app.db.user import users
-from app.controllers.redis_ops import increment, isAllowed, getAll
+from app.controllers.redis_ops import increment, isAllowed
 
 
 class EntityExtraction(Resource):
@@ -38,7 +38,7 @@ class EntityExtraction(Resource):
 
         increment(decoded['rid'], 'entities')
 
-        if not isAllowed(decoded['rid'], db_data['account_type']):
+        if not isAllowed(decoded['rid'], db_data['account_type'], 'entities'):
             return {'error': True, 'errorMessage': 'Your per day usage quota has exceeded.'}, 400
 
         client = textapi.Client(

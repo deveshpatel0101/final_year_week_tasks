@@ -14,15 +14,15 @@ class Usage(Resource):
         try:
             decoded = validate_jwt(access_token)
         except:
-            return {'error': True, 'errorMessage': 'Invalid secret token'}, 403
+            return {'error': True, 'errorType': 'secret_token', 'errorMessage': 'Invalid secret token'}, 403
 
         if not decoded:
-            return {'error': True, 'errorMessage': 'Invalid secret token'}, 403
+            return {'error': True, 'errorType': 'secret_token', 'errorMessage': 'Invalid secret token'}, 403
 
         db_data = users.find_one({'email': decoded['email']})
 
         if not db_data:
-            return {'error': True, 'errorMessage': 'Something went wrong from our side. Sorry for the incovenience.'}, 500
+            return {'error': True, 'errorType': 'server', 'errorMessage': 'Something went wrong from our side. Sorry for the incovenience.'}, 500
 
         for app in db_data['applications']:
             for allowed_api in app['allowed_apis']:

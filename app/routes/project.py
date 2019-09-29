@@ -17,25 +17,29 @@ class Project(Resource):
         try:
             decoded = validate_jwt(request.headers['Authorization'])
         except:
-            return {'error': True, 'errorMessage': 'Invalid access_token'}, 400
+            return {'error': True, 'errorType': 'access_token', 'errorMessage': 'Invalid access_token.'}, 400
 
         if not decoded:
-            return {'error': True, 'errorMessage': 'Invalid access_token'}, 400
+            return {'error': True, 'errorType': 'access_token', 'errorMessage': 'Invalid access_token.'}, 400
 
         data = request.get_json()
         data['requests'] = []
 
-        if not create_app_validator.validate({'data': data}):
-            return {'error': True, 'errorMessage': create_app_validator.errors['data'][0]}, 400
+        errors = create_app_validator.validate({'data': data})
+
+        if 'name' in errors:
+            return {'error': True, 'errorType': 'name', 'errorMessage': errors['name'][0]}, 400
+        elif 'allowed_apis' in errors:
+            return {'error': True, 'errorType': 'allowed_apis', 'errorMessage': errors['allowed'][0]}, 400
 
         db_data = users.find_one({'rid': decoded['rid']})
 
         if db_data['account_type'] == 'free' and len(db_data['applications']) == 3:
-            return {'error': True, 'errorMessage': {'applications': ['You have reached maximum limit of applications you can create. Subscribe to premium and create unlimited applications.']}}
+            return {'error': True, 'errorType': 'applications', 'errorMessage': 'You have reached maximum limit of applications you can create. Subscribe to premium and create unlimited applications.'}, 400
 
         for app in db_data['applications']:
             if app['name'] == data['name']:
-                return {'error': True, 'errorMessage': {'name': ['Application with the similar name already exist.']}}
+                return {'error': True, 'errorType': 'name', 'errorMessage': 'Application with the similar name already exist.'}, 400
 
         payload = {'rid': db_data['rid'], 'id': str(uuid.uuid4())}
 

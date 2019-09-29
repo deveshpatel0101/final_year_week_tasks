@@ -14,19 +14,24 @@ class SignIn(Resource):
     def post(self):
         data = request.get_json()
 
-        if not signin_validator.validate(data):
-            return {'error': True, 'errorMessage': signin_validator.errors}, 400
+        signin_validator.validate(data)
+        errors = signin_validator.errors
+
+        if 'email' in errors:
+            return {'error': True, 'errorType': 'email', 'errorMessage': errors['email'][0]}, 400
+        elif 'password' in errors:
+            return {'error': True, 'errorType': 'password', 'errorMessage': 'Password should contain: 6 characters or more, 1 uppercase letter and 1 special or numeric character.'}, 400
 
         result = users.find_one({'email': data['email']})
 
         if not result:
-            return {'error': True, 'errorMessage': 'User does not exist!'}, 400
+            return {'error': True, 'errorType': 'email', 'errorMessage': 'Invalid email.'}, 400
 
         pwd = bcrypt.checkpw(data['password'].encode(),
                              result['password'].encode())
 
         if not pwd:
-            return {'error': True, 'errorMessage': 'Invalid password'}, 400
+            return {'error': True, 'errorType': 'password', 'errorMessage': 'Incorrect password'}, 400
 
         curr_time = current_sec_time()
 

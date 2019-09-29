@@ -11,7 +11,7 @@ from app.validators.create_app import create_app_validator
 from app.controllers.time import current_sec_time
 
 
-class CreateApp(Resource):
+class Project(Resource):
     def post(self):
         decoded = None
         try:

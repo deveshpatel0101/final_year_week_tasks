@@ -78,9 +78,10 @@ def start_new_thread(key, api_type):
     main_key = f'{key}:{api_type}'
 
     if rds.llen(main_key) > 100 and not rds_for_db.lrange(main_key, 0, -1):
-        check = rds.move(main_key, 1)
-        if check:
-            t1 = Thread(target=push_requests_to_db)
+        data = rds.lrange(main_key, 0, -1)
+        isDeleted = rds.delete(main_key)
+        if isDeleted:
+            t1 = Thread(target=push_requests_to_db, args=[data, main_key])
             t1.start()
 
     return

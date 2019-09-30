@@ -38,7 +38,7 @@ class Translate(Resource):
 
         increment(decoded['rid'], 'translator')
 
-        if not isAllowed(decoded['rid'], db_data['account_type'], 'translator'):
+        if not isAllowed(decoded['rid'], db_data['account_type'], 'translator', secret_token):
             return {'error': True, 'errorMessage': 'Your per day usage quota has exceeded.'}, 400
 
         lang = data['lang']

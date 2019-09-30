@@ -10,6 +10,7 @@ class Usage(Resource):
     def get(self):
         decoded = None
         access_token = request.headers['Authorization']
+        app_name = request.args['name']
 
         try:
             decoded = validate_jwt(access_token)
@@ -19,29 +20,33 @@ class Usage(Resource):
         if not decoded:
             return {'error': True, 'errorType': 'secret_token', 'errorMessage': 'Invalid secret token'}, 403
 
-        db_data = users.find_one({'email': decoded['email']})
+        if not app_name:
+            return {'error': True, 'errorType': 'name', 'errorMessage': 'Application name not specified in the parameter.'}
+
+        db_data = users.find_one({'rid': decoded['rid']})
 
         if not db_data:
             return {'error': True, 'errorType': 'server', 'errorMessage': 'Something went wrong from our side. Sorry for the incovenience.'}, 500
 
         for app in db_data['applications']:
-            for allowed_api in app['allowed_apis']:
-                secret_token = app['secret_token']
-                search = f'{secret_token}:{allowed_api}'
-                rds_data = rds.lrange(search, 0, -1)
-                in_update_data = rds_for_db.lrange(search, 0, -1)
+            if app_name == app['name']:
+                for allowed_api in app['allowed_apis']:
+                    rid = db_data['rid']
+                    search = f'{rid}:{allowed_api}'
+                    rds_data = rds.lrange(search, 0, -1)
+                    in_update_data = rds_for_db.lrange(search, 0, -1)
 
-                if in_update_data:
-                    app['isInUpdate'] = True
+                    if in_update_data:
+                        app['isInUpdate'] = True
 
-                rds_data = rds_data + in_update_data
+                    rds_data = rds_data + in_update_data
 
-                for i in range(len(rds_data)):
-                    rds_data[i] = rds_data[i].decode()
+                    for i in range(len(rds_data)):
+                        rds_data[i] = rds_data[i].decode()
 
-                app['requests'] = app['requests'] + rds_data
+                    app['requests'][allowed_api] = app['requests'][allowed_api] + rds_data
 
-        for app in db_data['applications']:
-            del app['secret_token']
+                del app['secret_token']
+                return {'error': False, 'results': {'usage': app['requests']}}
 
-        return {'error': False, 'results': {'applications': db_data['applications']}}
+        return {'error': True, 'errorType': 'name', 'errorMessage': 'Application not found under the specified name.'}

@@ -38,7 +38,7 @@ class EntityExtraction(Resource):
 
         increment(decoded['rid'], 'entities')
 
-        if not isAllowed(decoded['rid'], db_data['account_type'], 'entities'):
+        if not isAllowed(decoded['rid'], db_data['account_type'], 'entities', secret_token):
             return {'error': True, 'errorMessage': 'Your per day usage quota has exceeded.'}, 400
 
         client = textapi.Client(

@@ -7,7 +7,7 @@ from app.controllers.update_requests import push_requests_to_db
 from app.db.redis import rds_for_db
 
 
-def isAllowed(key, account_type, api_type):
+def isAllowed(key, account_type, api_type, token):
     main_key = f'{key}:{api_type}'
 
     # if premium account allow unlimited calls
@@ -23,7 +23,7 @@ def isAllowed(key, account_type, api_type):
     # if allowed is false
     if data['allowed'] == 'False' or int(data['count']) > 100:
         first_access = datetime.datetime.fromtimestamp(
-            data['first_call']).strftime('%d-%B-%Y')
+            int(data['first_call'])).strftime('%d-%B-%Y')
         today = (datetime.datetime.now()).strftime('%d-%B-%Y')
 
         # check if request is on new day
@@ -31,26 +31,26 @@ def isAllowed(key, account_type, api_type):
             new_data = {'count': 1, 'allowed': 'True',
                         'first_call': current_sec_time()}
             rds.hmset(key, new_data)
-            start_new_thread(key, api_type)
+            start_new_thread(key, api_type, token)
             return True
 
         # pop one request and increment count by -1
         rds.rpop(main_key)
         rds.hincrby(key, 'count', -1)
         rds.hset(key, 'allowed', 'False')
-        start_new_thread(key, api_type)
+        start_new_thread(key, api_type, token)
 
         return False
 
     first_access = datetime.datetime.fromtimestamp(
-        data['first_call']).strftime('%d-%B-%Y')
+        int(data['first_call'])).strftime('%d-%B-%Y')
     today = (datetime.datetime.now()).strftime('%d-%B-%Y')
 
     # check if request is on new day
     if first_access != today:
         new_data = {'count': 1, 'allowed': 'True',
                     'first_call': current_sec_time()}
-    start_new_thread(key, api_type)
+    start_new_thread(key, api_type, token)
 
     return True
 
@@ -74,14 +74,14 @@ def increment(key, api_type):
     return True
 
 
-def start_new_thread(key, api_type):
+def start_new_thread(key, api_type, token):
     main_key = f'{key}:{api_type}'
 
-    if rds.llen(main_key) > 100 and not rds_for_db.lrange(main_key, 0, -1):
+    if rds.llen(main_key) > 2 and not rds_for_db.lrange(main_key, 0, -1):
         data = rds.lrange(main_key, 0, -1)
         isDeleted = rds.delete(main_key)
         if isDeleted:
-            t1 = Thread(target=push_requests_to_db, args=[data, main_key])
+            t1 = Thread(target=push_requests_to_db, args=[data, main_key, token])
             t1.start()
 
     return

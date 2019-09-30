@@ -23,9 +23,9 @@ if not os.getenv('PRODUCTION'):
 
 api.add_resource(SignUp, '/user/signup')
 api.add_resource(SignIn, '/user/signin')
-api.add_resource(Project, '/create/project')
-api.add_resource(Usage, '/apps/usage')
-api.add_resource(Token, '/app/token')
+api.add_resource(Project, '/user/project')
+api.add_resource(Usage, '/project/usage')
+api.add_resource(Token, '/project/token')
 api.add_resource(Translate, '/nlps/translator')
 api.add_resource(Sentiment, '/nlps/sentiment')
 api.add_resource(EntityExtraction, '/nlps/entities')

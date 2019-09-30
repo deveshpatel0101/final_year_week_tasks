@@ -16,12 +16,34 @@ create_app_schema = {
                     'regex': '^(translator)$|^(entities)|^(sentiment)$|^(summarizer)$'
                 },
                 'maxlength': 2,
+                'minlength': 1,
                 'required': True
             },
             'requests': {
-                'type': 'list',
-                'required': True,
-                'maxlength': 0
+                'type': 'dict',
+                'schema': {
+                    'translator': {
+                        'type': 'list',
+                        'maxlength': 0,
+                        'minlength': 0
+                    },
+                    'entities': {
+                        'type': 'list',
+                        'maxlength': 0,
+                        'minlength': 0
+                    },
+                    'summarizer': {
+                        'type': 'list',
+                        'maxlength': 0,
+                        'minlength': 0
+                    },
+                    'sentiment': {
+                        'type': 'list',
+                        'maxlength': 0,
+                        'minlength': 0
+                    }
+                },
+                'required': True
             },
             'created_at': {
                 'type': 'integer',

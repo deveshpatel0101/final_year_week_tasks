@@ -23,14 +23,19 @@ class Project(Resource):
             return {'error': True, 'errorType': 'access_token', 'errorMessage': 'Invalid access_token.'}, 400
 
         data = request.get_json()
-        data['requests'] = []
+        data['requests'] = {'entities': [], 'translator': [],
+                            'summarizer': [], 'sentiment': []}
 
-        errors = create_app_validator.validate({'data': data})
+        isValid = create_app_validator.validate({'data': data})
+        errors = create_app_validator.errors
+
+        if not isValid:
+            errors = errors['data'][0]
 
         if 'name' in errors:
             return {'error': True, 'errorType': 'name', 'errorMessage': errors['name'][0]}, 400
         elif 'allowed_apis' in errors:
-            return {'error': True, 'errorType': 'allowed_apis', 'errorMessage': errors['allowed'][0]}, 400
+            return {'error': True, 'errorType': 'allowed_apis', 'errorMessage': errors['allowed_apis'][0]}, 400
 
         db_data = users.find_one({'rid': decoded['rid']})
 
@@ -54,7 +59,7 @@ class Project(Resource):
 
         if not results:
             print(results)
-            return {'error': True, 'errorMessage': 'Something went wrong from our side. Sorry for the incovenience.'}, 500
+            return {'error': True, 'errorType': 'server', 'errorMessage': 'Something went wrong from our side. Sorry for the incovenience.'}, 500
 
         for app in results['applications']:
             del app['requests']
@@ -64,3 +69,24 @@ class Project(Resource):
         del data['requests']
 
         return {'error': False, 'results': results['applications'], 'added': data}, 200
+
+    def get(self):
+        decoded = None
+        try:
+            decoded = validate_jwt(request.headers['Authorization'])
+        except:
+            return {'error': True, 'errorType': 'access_token', 'errorMessage': 'Invalid access_token.'}, 400
+
+        if not decoded:
+            return {'error': True, 'errorType': 'access_token', 'errorMessage': 'Invalid access_token.'}, 400
+
+        data = users.find_one({'rid': decoded['rid']})
+
+        if not data:
+            return {'error': True, 'errorType': 'server', 'errorMessage': 'Something went wrong from our side. Sorry for the incovenience.'}, 500
+
+        for app in data['applications']:
+            del app['secret_token']
+            del app['requests']
+
+        return {'error': False, 'results': {'projects': data['applications']}}, 200

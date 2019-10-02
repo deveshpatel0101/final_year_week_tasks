@@ -45,4 +45,10 @@ class SignIn(Resource):
             payload,
             os.getenv('JWT_SECRET'), algorithm='HS256')
 
-        return {'error': False, 'access_token': encoded_jwt.decode()}
+        return {'error': False,
+                'access_token': encoded_jwt.decode(),
+                'userDate': {'fname': result['fname'],
+                             'lname': result['lname'],
+                             'accountType': result['account_type']
+                             }
+                }

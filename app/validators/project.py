@@ -1,6 +1,6 @@
 from cerberus import Validator
 
-create_app_schema = {
+create_project_schema = {
     'data': {
         'type': 'dict',
         'schema': {
@@ -53,4 +53,41 @@ create_app_schema = {
     }
 }
 
-create_app_validator = Validator(create_app_schema)
+update_project_schema = {
+    'name': {
+        'type': 'string',
+        'minlength': 3
+    },
+    'update': {
+        'type': 'dict',
+        'schema': {
+            'name': {
+                'type': 'string',
+                'minlength': 3,
+            },
+            'allowed_apis': {
+                'type': 'list',
+                'schema': {
+                    'type': 'string',
+                    'regex': '^(translator)$|^(entities)|^(sentiment)$|^(summarizer)$'
+                },
+                'maxlength': 2,
+                'minlength': 1,
+            }
+        },
+        'required': True
+    }
+}
+
+delete_project_schema = {
+    'name': {
+        'type': 'string',
+        'required': True
+    }
+}
+
+create_project_validator = Validator(create_project_schema)
+
+delete_project_validator = Validator(delete_project_schema)
+
+update_project_validator = Validator(update_project_schema)

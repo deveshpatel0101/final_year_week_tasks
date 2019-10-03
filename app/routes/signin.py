@@ -47,7 +47,7 @@ class SignIn(Resource):
 
         return {'error': False,
                 'access_token': encoded_jwt.decode(),
-                'userDate': {'fname': result['fname'],
+                'userData': {'fname': result['fname'],
                              'lname': result['lname'],
                              'accountType': result['account_type']
                              }

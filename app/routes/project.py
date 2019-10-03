@@ -53,6 +53,7 @@ class Project(Resource):
             os.getenv('JWT_SECRET'), algorithm='HS256').decode()
 
         data['created_at'] = current_sec_time()
+        data['id'] = str(uuid.uuid4())
 
         results = users.find_one_and_update({'email': db_data['email']}, {
             '$push': {'applications': data}}, return_document=ReturnDocument.AFTER)
@@ -89,7 +90,12 @@ class Project(Resource):
             del app['secret_token']
             del app['requests']
 
-        return {'error': False, 'results': {'projects': data['applications']}}, 200
+        return {'error': False,
+                'results': {'projects': data['applications']},
+                'userData': {'fname': data['fname'],
+                             'lname': data['lname'],
+                             'accountType': data['account_type']
+                             }}, 200
 
     def delete(self):
         decoded = None
@@ -175,7 +181,7 @@ class Project(Resource):
                     return {'error': True, 'errorType': 'update.name', 'errorMessage': 'Application with the similar name already exist.'}, 400
         elif 'allowed_apis' in data['update'] and db_data['account_type'] == 'free' and len(data['update']['allowed_apis']) > 2:
             return {'error': True, 'errorType': 'allowed_apis', 'errorMessage': 'Free acount tier user can select only two apis per project.'}, 400
-    
+
         after_update = None
 
         if 'name' in data['update'] and 'allowed_apis' in data['update']:

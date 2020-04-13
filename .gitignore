@@ -3,3 +3,4 @@ venv/
 secrets_apis.py
 .vscode/
 .env
+pickled_algos/

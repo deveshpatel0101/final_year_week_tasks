@@ -4,15 +4,10 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 import os
 
-from app.routes.signup import SignUp
-from app.routes.signin import SignIn
-from app.routes.project import Project
-from app.routes.usage import Usage
-from app.routes.token import Token
-from app.routes.nlps.translator import Translate
-from app.routes.nlps.sentiment import Sentiment
-from app.routes.nlps.entities import EntityExtraction
-from app.routes.nlps.summarization import Summarizer
+from app.routes.translator import Translate
+from app.routes.sentiment import Sentiment
+from app.routes.entities import EntityExtraction
+from app.routes.summarization import Summarizer
 
 app = Flask(__name__)
 CORS(app)
@@ -21,12 +16,7 @@ api = Api(app)
 if not os.getenv('PRODUCTION'):
     load_dotenv()
 
-api.add_resource(SignUp, '/user/signup')
-api.add_resource(SignIn, '/user/signin')
-api.add_resource(Project, '/user/project')
-api.add_resource(Usage, '/project/usage')
-api.add_resource(Token, '/project/token')
-api.add_resource(Translate, '/nlps/translator')
-api.add_resource(Sentiment, '/nlps/sentiment')
-api.add_resource(EntityExtraction, '/nlps/entities')
-api.add_resource(Summarizer, '/nlps/summarizer')
+api.add_resource(Translate, '/translator')
+api.add_resource(Sentiment, '/sentiment')
+api.add_resource(EntityExtraction, '/entities')
+api.add_resource(Summarizer, '/summarizer')
